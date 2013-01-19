@@ -1,5 +1,7 @@
 # Dropbox Recovery Tools
 
+http://movieos.org/code/dropbox-tools/
+
 A collection of little utilities I'm building as and when I need them to fix
 things that are wrong with my Dropbox. Dropbox is great and I could not live without
 it, but this is the Real World and things break.
