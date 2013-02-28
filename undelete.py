@@ -10,6 +10,10 @@ import datetime
 # dropbox API doesn't return any sensible datestrings.
 DATE_FORMAT = "%a, %d %b %Y %H:%M:%S +0000"
 
+MAX_DAYS=15
+
+USE_RESTORE = True
+
 if len(sys.argv) not in (2, 3):
     print "Usage: recover.py <output folder> [<start walk>]"
     sys.exit(1)
@@ -50,7 +54,7 @@ def recover_tree(folder = "/", recover_to=recover_to):
         if os.path.exists(target):
             # already recovered
             pass
-        elif date < datetime.datetime.now() - datetime.timedelta(days=5):
+        elif date < datetime.datetime.now() - datetime.timedelta(days=MAX_DAYS):
             # not deleted recently
             pass
         else:
@@ -66,20 +70,26 @@ def recover_tree(folder = "/", recover_to=recover_to):
             except OSError:
                 pass
 
-            # try to download file.
-            # I'm torn here - I could just use the Dropbox API and tell it to 
-            # restore the deleted file to the non-deleted version. PRoblem with
-            # that is that it might recover too much. THis approach lets me restore
-            # to a new folder with _just_ the restored files in, and cherry-pick
-            # what I want to copy back into the main dropbox.
-            try:
-                fh = client.get_file(filedata["path"], rev=alive["rev"])
-                with open(target+".temp", "w") as oh:
-                    oh.write(fh.read())
-                os.rename(target+'.temp', target)
-                print "    ..recovered"
-            except Exception, e:
-                print "*** RECOVERY FAILED: %s"%e
+            if USE_RESTORE:
+
+                restore = client.restore(filedata["path"], alive["rev"])
+                print restore
+            else:
+
+                # try to download file.
+                # I'm torn here - I could just use the Dropbox API and tell it to 
+                # restore the deleted file to the non-deleted version. PRoblem with
+                # that is that it might recover too much. THis approach lets me restore
+                # to a new folder with _just_ the restored files in, and cherry-pick
+                # what I want to copy back into the main dropbox.
+                try:
+                    fh = client.get_file(filedata["path"], rev=alive["rev"])
+                    with open(target+".temp", "w") as oh:
+                        oh.write(fh.read())
+                    os.rename(target+'.temp', target)
+                    print "    ..recovered"
+                except Exception, e:
+                    print "*** RECOVERY FAILED: %s"%e
 
 
     # now loop over the folders and recursively walk into them. Folders can
