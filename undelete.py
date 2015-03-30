@@ -33,9 +33,9 @@ def recover_tree(folder = "/", recover_to=recover_to):
     print "walking in %s"%folder
 
     try:
-        meta = client.metadata(folder, include_deleted=True, file_limit=10000)
+        meta = client.metadata(folder, include_deleted=True, file_limit=25000)
     except rest.ErrorResponse, e:
-        print e # normally "too many files". Dropbox will only list 10000 files in
+        print e # normally "too many files". Dropbox will only list 25000 files in
         # a folder. THere is probably a way around this, but I haven't needed it yet.
         return
     
